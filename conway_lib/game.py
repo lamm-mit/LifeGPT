@@ -73,20 +73,12 @@ class ConwayGame:
 
     def get_state_as_string(self, grid):
         return ''.join(str(int(cell)) for row in grid for cell in row)
-
-    # def generate_training_sets(self, A=100, N=32, I=2):
-    #     self.WIDTH = self.HEIGHT = N
-    #     self.GRID_WIDTH, self.GRID_HEIGHT = self.WIDTH // self.GRID_SIZE, self.HEIGHT // self.GRID_SIZE
-    #     self.grid = np.zeros((self.GRID_WIDTH, self.GRID_HEIGHT), dtype=bool)
-
-    #     data = []
-    #     for index in range(A):
-    #         self.randomize_grid()
-    #         self.run(num_iterations=I)
-    #         metagrid = self.metagrid
-    #         states = [self.get_state_as_string(metagrid[i]) for i in range(I)]
-    #         data.append(states)
-    #     return np.array(data)
+    
+    def set_grid_from_string(self, grid_string):
+        if len(grid_string) != self.GRID_WIDTH * self.GRID_HEIGHT:
+            raise ValueError("The length of the input string does not match the grid dimensions.")
+        grid_array = np.array([int(char) for char in grid_string]).reshape((self.GRID_WIDTH, self.GRID_HEIGHT))
+        self.grid = grid_array.astype(bool)
 
     def generate_sets(self, A=100, N=32, I=2, s=.5, e=.5):
         self.WIDTH = self.HEIGHT = N
