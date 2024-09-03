@@ -14,7 +14,7 @@ The Game of Life (Life), a well known algorithm within the broader class of cell
 
 To set up the Conda environment for this project, you will use the `LifeGPT_env.yml` file provided in this repository. This file contains all the necessary dependencies and package versions to ensure the environment is consistent with what the project requires.
 
-### Step-by-Step Guide to Create the Conda Environment
+### Step-by-Step Guide to Create the LifeGPT Conda Environment
 
 1. **Install Conda (if not already installed):**
    
@@ -27,6 +27,7 @@ To set up the Conda environment for this project, you will use the `LifeGPT_env.
    ```bash
    git clone https://github.com/lamm-mit/LifeGPT.git
    cd LifeGPT
+   ```
 
 3. **Create the Conda Environment:**
 
@@ -34,61 +35,48 @@ To set up the Conda environment for this project, you will use the `LifeGPT_env.
 
    ```bash
     conda env create -f LifeGPT_env.yml
+    ```
 
 This command will create a new environment named LifeGPT_env with all the dependencies specified in the .yml file.
 
 4. **Activate the Conda Environment:**
 
-Once the environment is created, activate it using the following command:
+    Once the environment is created, activate it using the following command:
 
     ```bash
     conda activate LifeGPT_env
+    ```
+5. **Verify the Environment:**
 
-Verify the Environment:
+    You can verify that the environment is set up correctly and that all necessary packages are installed by listing the packages:
 
-You can verify that the environment is set up correctly and that all necessary packages are installed by listing the packages:
+    ```bash
+    conda list
+    ```
 
-bash
-
-conda list
-
-Remove Personal Paths:
-
-The LifeGPT_env.yml file is configured to avoid including personal paths (e.g., prefix: lines), so no further modification is required to remove user-specific information.
-
-Run the Project:
-
-After activating the environment, you can run the project scripts or applications. For example:
-
-bash
-
-    python your_script.py
-
-Additional Notes
-
-    Updating the Environment:
+6. **Updating the Environment:**
 
     If there are changes in the required packages or if the environment needs to be updated, modify the LifeGPT_env.yml file accordingly, and then update the environment with:
 
-    bash
+    ```bash
+    conda env update --file LifeGPT_env.yml --prune
+    ```
 
-conda env update --file LifeGPT_env.yml --prune
+7. **Deactivating the Environment:**
 
-Deactivating the Environment:
+    To deactivate the environment, simply run:
 
-To deactivate the environment, simply run:
+    ```bash
+    conda deactivate
+    ```
 
-bash
+8. **Removing the Environment:**
 
-conda deactivate
-
-Removing the Environment:
-
-If you need to remove the environment at any point, use:
-
-bash
-
-conda remove --name LifeGPT_env --all
+    If you need to remove the environment at any point, use:
+    
+    ```bash
+    conda remove --name LifeGPT_env --all
+    ```
 
 ## Datasets
 
