@@ -1,0 +1,1 @@
+Files 'model.py', 'optimizer.py', and 'tokenizer.py' are legacy code and may be ignored.
