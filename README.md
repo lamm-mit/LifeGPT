@@ -358,7 +358,7 @@ def get_model(max_length, num_words, model_name, dim=256, depth=12, heads=8, att
 
     return model, model_dir
 
-model_name = "07_22_2024_Conway_2_State_Jump_Rot_Pos_On_Masking_On_Broad_Entrpoy_Homog"
+model_name = "07_22_2024_Conway_2_State_Jump_Rot_Pos_On_Masking_On_Broad_Entropy_Homog"
 rot_pos = True
 model, model_dir = get_model(max_length, num_words, model_name, rot_pos=rot_pos, masking=True, mask_prob = 0.15)
 
