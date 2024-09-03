@@ -81,26 +81,65 @@ Included in this repository, in the subfolder [LifeGPT](https://github.com/lamm-
 1. **Testing Data:**
     Both testing data files ([conway_test_states_32by32_20240716_151502.csv](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/conway_test_states_32by32_20240716_151502.csv) and [conway_test_states_32by32_20240827_172807.csv](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/conway_test_states_32by32_20240827_172807.csv)) correspond to the same initial conditions (ICs). They are distinct because [conway_test_states_32by32_20240716_151502.csv](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/conway_test_states_32by32_20240716_151502.csv) contains a total of 10 timesteps for Life, while [conway_test_states_32by32_20240827_172807.csv](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/conway_test_states_32by32_20240827_172807.csv) contains 250 timesteps. These data are used for accuracy benchmarking (see [Accuracy_Benchmarking.ipynb](https://github.com/lamm-mit/LifeGPT/blob/main/Accuracy_Benchmarking.ipynb)), as well as for comparison with 'ground truth' (GT) in the case of the 'autoregressive autoregressor' (ARAR) -- see [ARAR_249_iterations.ipynb](https://github.com/lamm-mit/LifeGPT/blob/main/ARAR_249_iterations.ipynb) and [ARAR_9_iterations.ipynb](https://github.com/lamm-mit/LifeGPT/blob/main/ARAR_9_iterations.ipynb).
 
-2. **Training and Validation Data**
+2. **Training and Validation Data:**
+
     In addition, there are 2 files corresponding to training data, and 2 files corresponding to validation data. The data can be divided into two groups high-entropy and broad-entropy.
     
-    a. *High-Entropy*
+    a. *High-Entropy:*
+
         High-entropy data is defined as data which contains stochastically generated ICs, where there is an equal expected value of finding live (1-state) or dead (0-state) cells. We include a 10000-sample high-entropy dataset for training ([conway_states_0.5_0.5_10000by32by32by10_toroidal_20240813_224815_sorder0.5_eorder0.5.csv](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/conway_states_0.5_0.5_10000by32by32by10_toroidal_20240813_224815_sorder0.5_eorder0.5.csv)) and a 1000-sample high-entropy dataset for finding validation losses ([conway_states_0.5_0.5_1000by32by32by10_toroidal_20240813_224611_sorder0.5_eorder0.5.csv](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/conway_states_0.5_0.5_1000by32by32by10_toroidal_20240813_224611_sorder0.5_eorder0.5.csv)). 
 
-    b. *Broad-Entropy*
+    b. *Broad-Entropy:*
+
         Broad-entropy data is defined as data which contains stochastically generated ICs, where each sample in the dataset is generated with an order parameter ranging linearly from 0 to 1, where the order parameter may be interpreted as the expected value of the probability of finding a 1 in the corresponding IC. We include a 10000-sample broad-entropy dataset for training ([conway_states_0_1_10000by32by32by10_toroidal_20240711_133408.csv](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/conway_states_0_1_10000by32by32by10_toroidal_20240711_133408.csv)) and a 1000-sample broad-entropy dataset for finding validation losses ([conway_states_0_1_1000by32by32by10_toroidal_20240711_151806.csv](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/conway_states_0_1_1000by32by32by10_toroidal_20240711_151806.csv)).
 
-3. **Example Data**
-    For demonstrative purposes, we also include two datasets ([EXAMPLE_conway_states_0_1_100by50by50by20_toroidal_20240821_152545.csv](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/EXAMPLE_conway_states_0_1_100by50by50by20_toroidal_20240821_152545.csv) and [EXAMPLE_conway_states_0_1_100by50by50by20_toroidal_20240821_152920.csv](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/EXAMPLE_conway_states_0_1_100by50by50by20_toroidal_20240821_152920.csv))
+3. **Example Data:**
 
-
+    For demonstrative purposes, we also include two datasets ([EXAMPLE_conway_states_0_1_100by50by50by20_toroidal_20240821_152545.csv](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/EXAMPLE_conway_states_0_1_100by50by50by20_toroidal_20240821_152545.csv) and [EXAMPLE_conway_states_0_1_100by50by50by20_toroidal_20240821_152920.csv](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/EXAMPLE_conway_states_0_1_100by50by50by20_toroidal_20240821_152920.csv)) which showcases the ability of our dataset generator script, [training_set_gen.ipynb](https://github.com/lamm-mit/LifeGPT/blob/main/training_set_gen.ipynb), to generate datasets of varying sizes and entropies.
 
 
 ## Training
 ### Prewritten Scripts with Preset Training Parameters
 Included in this repository are two .py files containing prewritten code for training LifeGPT models using different training data and hyperparameters.
 
-The file [LifeGPT_toroidal_rot_pos_on_no_forgetful_mask_high_ent.py]()
+The file [LifeGPT_toroidal_rot_pos_on_no_forgetful_mask_high_ent.py](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/LifeGPT_toroidal_rot_pos_on_no_forgetful_mask_high_ent.py) corresponds to training (and periodically benchmarking at temperature=0) a model without forgetful causal masking (FCM), and using high-entropy data.
+
+The file [LifeGPT_toroidal_rot_pos_on_15_percent_forgetful_mask_broad_ent.py](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/LifeGPT_toroidal_rot_pos_on_15_percent_forgetful_mask_broad_ent.py) corresponds to training (and periodically benchmarking at temperature=0) a model without forgetful causal masking (FCM), and using high-entropy data.
+
+### Training Tutorial
+The following is a walk-through, of the process of writing python code for training LifeGPT, with some example hyperparameters from our paper.
+0. **Import Modules:**
+```python
+import os
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
+import random
+import gzip
+import numpy as np
+import torch
+import torch.optim as optim
+from torch.nn import functional as F
+from torch.utils.data import DataLoader, Dataset
+import pandas as pd
+import seaborn as sns
+import time
+from x_transformers import TransformerWrapper, Decoder
+from x_transformers.autoregressive_wrapper import AutoregressiveWrapper
+import datetime
+from IPython.display import display, HTML
+from tqdm import tqdm, trange
+import typing
+import matplotlib.pyplot as plt
+import csv
+```
+1. **Initialize Datasets:**
+```python
+
+```
+2. **Define the Tokenizer Class:**
+3. **Define Other Helpful Functions:**
+4. **Great Model:**
+5. **Define Data Loader:**
+6. **
 
 # Inference with trained weights
 Accuracy benchmarking is done in the Jupyter Notebook [Accuracy_Benchmarking.ipynb](https://github.com/lamm-mit/LifeGPT/blob/main/Accuracy_Benchmarking.ipynb). 
