@@ -11,7 +11,6 @@ The Game of Life (Life), a well known algorithm within the broader class of cell
 ![image/png](https://cdn-uploads.huggingface.co/production/uploads/623ce1c6b66fedf374859fe7/AMKWGJXj4psBwaJ5ZCzs7.png)
 
 # Training
-
 ![image/png](https://cdn-uploads.huggingface.co/production/uploads/623ce1c6b66fedf374859fe7/k6JawabkK4vTWlHkCda8E.png)
 
 # Miscalleneous 
