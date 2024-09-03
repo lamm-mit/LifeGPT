@@ -78,6 +78,7 @@ This command will create a new environment named LifeGPT_env with all the depend
 
 ## Datasets
 Included in this repository, in the subfolder [LifeGPT](https://github.com/lamm-mit/LifeGPT/tree/main/LifeGPT), are several csv files corresponding to training, validation, and testing data.
+### Overview of Dataset Types
 1. **Testing Data:**
     Both testing data files ([conway_test_states_32by32_20240716_151502.csv](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/conway_test_states_32by32_20240716_151502.csv) and [conway_test_states_32by32_20240827_172807.csv](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/conway_test_states_32by32_20240827_172807.csv)) correspond to the same initial conditions (ICs). They are distinct because [conway_test_states_32by32_20240716_151502.csv](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/conway_test_states_32by32_20240716_151502.csv) contains a total of 10 timesteps for Life, while [conway_test_states_32by32_20240827_172807.csv](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/conway_test_states_32by32_20240827_172807.csv) contains 250 timesteps. These data are used for accuracy benchmarking (see [Accuracy_Benchmarking.ipynb](https://github.com/lamm-mit/LifeGPT/blob/main/Accuracy_Benchmarking.ipynb)), as well as for comparison with 'ground truth' (GT) in the case of the 'autoregressive autoregressor' (ARAR) -- see [ARAR_249_iterations.ipynb](https://github.com/lamm-mit/LifeGPT/blob/main/ARAR_249_iterations.ipynb) and [ARAR_9_iterations.ipynb](https://github.com/lamm-mit/LifeGPT/blob/main/ARAR_9_iterations.ipynb).
 
@@ -96,7 +97,8 @@ Included in this repository, in the subfolder [LifeGPT](https://github.com/lamm-
 3. **Example Data:**
 
     For demonstrative purposes, we also include two datasets ([EXAMPLE_conway_states_0_1_100by50by50by20_toroidal_20240821_152545.csv](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/EXAMPLE_conway_states_0_1_100by50by50by20_toroidal_20240821_152545.csv) and [EXAMPLE_conway_states_0_1_100by50by50by20_toroidal_20240821_152920.csv](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/EXAMPLE_conway_states_0_1_100by50by50by20_toroidal_20240821_152920.csv)) which showcases the ability of our dataset generator script, [training_set_gen.ipynb](https://github.com/lamm-mit/LifeGPT/blob/main/training_set_gen.ipynb), to generate datasets of varying sizes and entropies.
-
+### Tutorial on Dataset Generation
+The Jupyter Notebook [training_set_gen.ipynb](https://github.com/lamm-mit/LifeGPT/blob/main/training_set_gen.ipynb) contains example scripts for generating training, validation, and testing sets. All scripts utilize functions in the ConwayGame class found in [game.py](https://github.com/lamm-mit/LifeGPT/blob/main/conway_lib/game.py), which itself may be found in [conway_lib](https://github.com/lamm-mit/LifeGPT/tree/main/conway_lib).
 
 ## Training
 ### Prewritten Scripts with Preset Training Parameters
@@ -107,7 +109,7 @@ The file [LifeGPT_toroidal_rot_pos_on_no_forgetful_mask_high_ent.py](https://git
 The file [LifeGPT_toroidal_rot_pos_on_15_percent_forgetful_mask_broad_ent.py](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/LifeGPT_toroidal_rot_pos_on_15_percent_forgetful_mask_broad_ent.py) corresponds to training (and periodically benchmarking at temperature=0) a model without forgetful causal masking (FCM), and using high-entropy data.
 
 ### Training Tutorial
-The following is a walk-through, of the process of writing python code for training LifeGPT, with some example hyperparameters from our paper.
+The following is a walk-through of the process of writing python code for training LifeGPT, with some example hyperparameters from our paper.
 
 0. **Import Modules:**
 ```python
@@ -616,20 +618,168 @@ plt.show()
 
 There were two methods by which we assessed the zero/few shot capabilities of LifeGPT. Both methods required prompting the model with an initial input sequence of tokens, followed by autoregressive generation for a pre-selected number of tokens (since all games we considered were the same size).
 
+The basic process for all inferencing with LifeGPT is described as follows:
+
+1. **Initialize Modules and Relevant Functions:**
+```python
+import os
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import re
+import torch
+from x_transformers import TransformerWrapper, Decoder
+from x_transformers.autoregressive_wrapper import AutoregressiveWrapper
+import typing
+
+# Ensure Torch is using Cuda
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(device)
+
+class Tokenizer:
+    def __init__(self, n_pad: int, device: torch.device, pad_byte: int = 0):
+        self.n_pad = n_pad
+        self.device = device
+        self.pad_byte = pad_byte
+
+    def tokenize_str(self, sentence: str, encoding="utf8", do_padding=True):
+        base = list(bytes(sentence, encoding))
+        if do_padding:
+            if len(base) < self.n_pad:
+                base.extend([self.pad_byte] * (self.n_pad - len(base)))
+            assert len(base) == self.n_pad, f"n_pad is too small, use {len(base)} or greater."
+        tensor = torch.Tensor(base)
+        return tensor.long().to(self.device)
+
+    def texts_to_sequences(self, texts: typing.List[str], encoding="utf8", do_padding=True):
+        sentences = [self.tokenize_str(sentence, do_padding=do_padding).unsqueeze(0) for sentence in texts]
+        return torch.cat(sentences, dim=0).to(self.device)
+
+    def sequences_to_texts(self, texts: torch.Tensor, encoding="utf8"):
+        out = []
+        for seq in texts:
+            chars = []
+            i = 0
+            while i < len(seq) and seq[i] != 0:
+                chars.append(int(seq[i]))
+                i += 1
+            try:
+                out.append(bytes(chars).decode(encoding))
+            except:
+                pass
+        return out
+
+def empty_cuda_cache():
+    torch.cuda.empty_cache()
+
+def extract_sample(string_input, start_token='[', end_token=']'):
+    i = string_input.find(start_token)
+    j = string_input.find(end_token)
+    return string_input[i+1:j]
+
+def extract_task(string_input, end_task_token='>'):
+    j = string_input.find(end_task_token)
+    return string_input[:j+1]
+
+```
+2. **Define Load Model Function:**
+```python
+def load_model(model_path, max_length, num_words):
+    empty_cuda_cache()
+    
+    model = TransformerWrapper(
+        num_tokens=num_words,
+        max_seq_len=max_length,
+        attn_layers=Decoder(
+            dim=256,
+            depth=12,
+            heads=8,
+            attn_dim_head=64,
+            rotary_pos_emb=True,
+            attn_flash=True
+        )
+    )
+    model = AutoregressiveWrapper(model)
+    model.load_state_dict(torch.load(model_path))
+    model.to(device)
+    print(f"Model loaded from {model_path}")
+    
+    return model
+
+```
+3. **Load Saved Weights Into Model**
+The folder [model_parameters](https://github.com/lamm-mit/LifeGPT/tree/main/model_parameters) contains .pt files, containing the weights of LifeGPT versions from previous training runs. The folder [08_14_2024_Conway_2_State_Jump_Rot_Pos_On_Masking_Off_High_Entropy_Homog_2024-08-14 12-24-10](https://github.com/lamm-mit/LifeGPT/tree/main/model_parameters/08_14_2024_Conway_2_State_Jump_Rot_Pos_On_Masking_Off_High_Entropy_Homog_2024-08-14%2012-24-10) pertains to a training run without the use of FCM, and with high-entropy data, while the folder [07_22_2024_Conway_2_State_Jump_Rot_Pos_On_Masking_On_Broad_Entropy_Homog_2024-07-23 10-37-31](https://github.com/lamm-mit/LifeGPT/tree/main/model_parameters/07_22_2024_Conway_2_State_Jump_Rot_Pos_On_Masking_On_Broad_Entropy_Homog_2024-07-23%2010-37-31) pertains to a training run using FCM (with 15% FCM masking) and with broad-entropy data (best performing). These folders also contain CSV files with data on the training progress of each training run. Note: the accuracies in these CSV files are calculated in a manner such that any instance of LifeGPT generating un-decodable tokens (incompatible with the Tokenizer class) will automatically flag the entire benchmark period as having 0 accuracy. This is not the case in our main benchmarking script ([Accuracy_Benchmarking.ipynb](https://github.com/lamm-mit/LifeGPT/blob/main/Accuracy_Benchmarking.ipynb)).
+
+```python
+epoch=50
+num_words=256
+max_length = 2071 #len("@PredictNextState<1024-bits> [1024-bits]$")
+model_path = f"model_parameters\\07_22_2024_Conway_2_State_Jump_Rot_Pos_On_Masking_On_Broad_Entropy_Homog_2024-07-23 10-37-31\\LifeGPT_epoch_{epoch}.pt"
+    model = load_model(model_path, max_length, num_words)
+```
+4. **Properly Tokenize and Reshape the Input Sequence:**
+```python
+
+input_seq = "@PredictNextState<001001...> [01001...]$" #Data within <> and [] delimiters should be a 1024-bit long binary sequence (1024 bits in each).
+inp = extract_task(input_seq, end_task_token='>')
+inp = torch.Tensor(tokenizer.texts_to_sequences(inp, do_padding=False)).to(device)
+inp = inp.transpose(0, 1)
+inp = inp.long()
+print(f"generate_length: {generate_length}")
+print(f"inp.shape: {inp.shape}")
+```
+5. **Generate Input Sequence**
+
+The following script will generate both a tokenized ouput and a untokenized string output (assuming the model does not predict any tokens which are not able to be decoded by the Tokenizer class.)
+
+```python
+with torch.no_grad():
+    sample = model.generate(
+        prompts=inp,
+        seq_len=generate_length,
+        temperature=temp,
+        cache_kv=True
+    )
+
+print(sample)
+
+try:
+    output_str = tokenizer.sequences_to_texts(sample[:1])
+    pred = extract_sample(output_str[0])
+    print(f"Prediction: {pred}")
+
+except Exception as e:
+    print(f"Error decoding output: {e}")
+```
 ## Accuracy Benchmarking
 
-Accuracy benchmarking is done in the Jupyter Notebook [Accuracy_Benchmarking.ipynb](https://github.com/lamm-mit/LifeGPT/blob/main/Accuracy_Benchmarking.ipynb). 
+Accuracy benchmarking is done in the Jupyter Notebook [Accuracy_Benchmarking.ipynb](https://github.com/lamm-mit/LifeGPT/blob/main/Accuracy_Benchmarking.ipynb). For varying combinations of epochs and temperatures, LifeGPT's inferences (predictions) for the next-game-state (NGS) in Life are compared to GT data in the testing dataset, and an accuracy score is calculated. This is only demonstrated for the version of LifeGPT trained on broad-entropy data. Data from this script are recorded in [model_accuracy_results.csv](https://github.com/lamm-mit/LifeGPT/blob/main/model_accuracy_results.csv)
+
+The following is an image of the training performance (cross-entropy loss vs. epoch) and model accuracy on the testing set.
+
+![image/png](https://cdn-uploads.huggingface.co/production/uploads/623ce1c6b66fedf374859fe7/k6JawabkK4vTWlHkCda8E.png)
+
+## Determination of Training Set Entropy Effects
+
+Training set entropy effects were characterized within the Jupyter Notebook [Training_Data_Ordering_Investigation.ipynb](https://github.com/lamm-mit/LifeGPT/blob/main/Training_Data_Ordering_Investigation.ipynb). To do this, a 110-sample validation set was stochastically generated using the ConwayGame class found in [game.py](https://github.com/lamm-mit/LifeGPT/blob/main/conway_lib/game.py), which itself may be found in [conway_lib](https://github.com/lamm-mit/LifeGPT/tree/main/conway_lib). 
 
 ## Autoregressive Autoregressor (ARAR)
 
+ARAR is achived through recursive process of inference based on an input token sequence given to LifeGPT, resulting in a new sequence of tokens which are subsequently fed back into the input of LifeGPT. This loop may go on until a desired number of iterations are reached. Our ARAR scripts ([ARAR_9_iterations.ipynb](https://github.com/lamm-mit/LifeGPT/blob/main/ARAR_9_iterations.ipynb) and [ARAR_249_iterations.ipynb](https://github.com/lamm-mit/LifeGPT/blob/main/ARAR_249_iterations.ipynb)) demonstrate the application of this method for running Life in the case of 9 iterations for multiple model temperatures, and 249 iterations for only temperature=0, respectively.
 
+Note: ARAR only utilizes versions of LifeGPT trained on broad-entropy data.
+
+The afformentioned ARAR scripts include code that generates GIF animations and figures (se [Testing_Set_ARAR_Animations_and_Figures](https://github.com/lamm-mit/LifeGPT/tree/main/Testing_Set_ARAR_Animations_and_Figures)) showing the evolution of LifeGPT's recursive NGS predictions, Life (GT), and the discrepancy (error) between the two. GIFs are generated for each sample in the testing set, for differing temperatures and epochs, for 9 iterations of Life. 250 iterations are generated for only one version of LifeGPT (epoch=50, temperature=0) due to time and compute constraints. The following figures give examples of predictions made with ARAR.
 
 ![image/png](https://cdn-uploads.huggingface.co/production/uploads/623ce1c6b66fedf374859fe7/AMKWGJXj4psBwaJ5ZCzs7.png)
 
-# Training
-![image/png](https://cdn-uploads.huggingface.co/production/uploads/623ce1c6b66fedf374859fe7/k6JawabkK4vTWlHkCda8E.png)
 
-# Miscalleneous 
+
+# Miscalleneous
+To best demonstrate our use of a toroidal grid topology (which is functionally the same as periodic boundary conditions), we include a GIF animation of the famous 'glider gun' pattern, from Life, played out on the surface of a 3D torus (see [toroidal_grid_glider_gun.gif](https://github.com/lamm-mit/LifeGPT/raw/main/toroidal_grid_glider_gun.gif)). In this animations, live cells are represented with blue dots, and dead cells are represented as the absence of a dot. The torus is made to be translucent to better illustrate its unique geometry. We hope that this facilitates a more intuitive understanding of the manner in which periodic boundary conditions function in life. 
+
+![Glider Gun GIF](https://github.com/lamm-mit/LifeGPT/raw/main/toroidal_grid_glider_gun.gif)
+
 
 ```bibtex
 @article{berkovich2024lifegpt,
