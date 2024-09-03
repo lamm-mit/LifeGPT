@@ -106,9 +106,9 @@ The Jupyter Notebook [training_set_gen.ipynb](https://github.com/lamm-mit/LifeGP
 ### Prewritten Scripts with Preset Training Parameters
 Included in this repository are two .py files containing prewritten code for training LifeGPT models using different training data and hyperparameters.
 
-The file [LifeGPT_toroidal_rot_pos_on_no_forgetful_mask_high_ent.py](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/LifeGPT_toroidal_rot_pos_on_no_forgetful_mask_high_ent.py) corresponds to training (and periodically benchmarking at temperature=0) a model without forgetful causal masking (FCM), and using high-entropy data.
+The file [LifeGPT_toroidal_rot_pos_on_no_forgetful_mask_high_ent.py](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/LifeGPT_toroidal_rot_pos_on_no_forgetful_mask_high_ent.py) corresponds to training (and periodically benchmarking at temperature=1) a model without forgetful causal masking (FCM), and using high-entropy data.
 
-The file [LifeGPT_toroidal_rot_pos_on_15_percent_forgetful_mask_broad_ent.py](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/LifeGPT_toroidal_rot_pos_on_15_percent_forgetful_mask_broad_ent.py) corresponds to training (and periodically benchmarking at temperature=0) a model with forgetful causal masking (FCM), and using broad-entropy data.
+The file [LifeGPT_toroidal_rot_pos_on_15_percent_forgetful_mask_broad_ent.py](https://github.com/lamm-mit/LifeGPT/blob/main/LifeGPT/LifeGPT_toroidal_rot_pos_on_15_percent_forgetful_mask_broad_ent.py) corresponds to training (and periodically benchmarking at temperature=1) a model with forgetful causal masking (FCM), and using broad-entropy data.
 
 ### Training Tutorial
 The following is a walk-through of the process of writing python code for training LifeGPT, with some example hyperparameters from our paper.
