@@ -1,5 +1,3 @@
-
-
 =======
 # LifeGPT: Topology-Agnostic Generative Pretrained Transformer Model for Cellular Automata
 
@@ -79,10 +77,14 @@ This command will create a new environment named LifeGPT_env with all the depend
     ```
 
 ## Datasets
+Included in this repository, [here](https://github.com/lamm-mit/LifeGPT/tree/main/LifeGPT), are several csv files corresponding to training, validation, and testing data.
+
+Both testing data files ([]() and []()) correspond to the same initial conditions (ICs). They are distinct because []() contains a total of 10 timesteps for Life, while []() contains 250 timesteps. These data are used for accuracy benchmarking (see []()), as well as 
+
 
 ## Training
 ### Prewritten Scripts with Preset Training Parameters
-
+Included in this repository are two .py files containing prewritten code for training LifeGPT models using different training data and hyperparameters.
 
 # Inference with trained weights
 
