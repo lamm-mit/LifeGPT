@@ -785,10 +785,13 @@ To best demonstrate our use of a toroidal grid topology (which is functionally t
 
 ```bibtex
 @article{berkovich2024lifegpt,
-  title={LifeGPT: Topology-Agnostic Generative Pretrained Transformer Model for Cellular Automata},
-  author={Berkovich, Jaime A. and Buehler, Markus J.},
-  journal={Preprint},
-  year={2024},
+      title={LifeGPT: Topology-Agnostic Generative Pretrained Transformer Model for Cellular Automata}, 
+      author={Jaime A. Berkovich and Markus J. Buehler},
+      year={2024},
+      eprint={2409.12182},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2409.12182}, 
 }
 ```
 <!-- >>>>>>> 2dd743f2da611e0a40f0797fec8cfddde1ca7b9a -->
