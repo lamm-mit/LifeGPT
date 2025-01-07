@@ -777,7 +777,7 @@ The afformentioned ARAR scripts include code that generates GIF animations and f
 
 
 
-# Miscalleneous
+# Miscellaneous
 To best demonstrate our use of a toroidal grid topology (which is functionally the same as periodic boundary conditions), we include a GIF animation of the famous 'glider gun' pattern, from Life, played out on the surface of a 3D torus (see [toroidal_grid_glider_gun.gif](https://github.com/lamm-mit/LifeGPT/raw/main/toroidal_grid_glider_gun.gif)). In this animations, live cells are represented with blue dots, and dead cells are represented as the absence of a dot. The torus is made to be translucent to better illustrate its unique geometry. We hope that this facilitates a more intuitive understanding of the manner in which periodic boundary conditions function with respect to Life. 
 
 ![Glider Gun GIF](https://github.com/lamm-mit/LifeGPT/raw/main/toroidal_grid_glider_gun.gif)
@@ -791,4 +791,4 @@ To best demonstrate our use of a toroidal grid topology (which is functionally t
   year={2024},
 }
 ```
-<!-- >>>>>>> 2dd743f2da611e0a40f0797fec8cfddde1ca7b9a -->
+
