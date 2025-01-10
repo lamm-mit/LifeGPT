@@ -1,2 +1,1 @@
-!Multi_Grid/ 
-Multi_Grid/model_parameters/*.pt 
+Multi_Grid/model_parameters/**/*.pt 
